@@ -12,7 +12,7 @@ class YoutubeMusicApi {
         this.cookies = new tough.CookieJar()
 
         this.client = axios.create({
-            baseURL: 'https://music.youtube.com/',
+            baseURL: '/integrations/ytm/',
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36',
                 'Accept-Language': 'en-US,en;q=0.5',
@@ -194,55 +194,55 @@ class YoutubeMusicApi {
         }
     }
 
-    getPlaylist(browseId, contentLimit = 100) {
-        if (_.startsWith(browseId, 'VL') || _.startsWith(browseId, 'PL')) {
-            _.startsWith(browseId, 'PL') && (browseId = 'VL' + browseId)
-            return new Promise((resolve, reject) => {
-                this._createApiRequest('browse', utils.buildEndpointContext('PLAYLIST', browseId))
-                    .then(context => {
-                        try {
-                            var result = parsers.parsePlaylistPage(context)
-                            const getContinuations = params => {
-                                this._createApiRequest('browse', {}, {
-                                        ctoken: params.continuation,
-                                        continuation: params.continuation,
-                                        itct: params.continuation.clickTrackingParams
-                                    })
-                                    .then(context => {
-                                        const continuationResult = parsers.parsePlaylistPage(context)
-                                        if (Array.isArray(continuationResult.content)) {
-                                            result.content = _.concat(result.content, continuationResult.content)
-                                            result.continuation = continuationResult.continuation
-                                        }
-                                        if (!Array.isArray(continuationResult.continuation) && result.continuation instanceof Object) {
-                                            if (contentLimit > result.content.length) {
-                                                getContinuation(continuationResult.continuation)
-                                            } else {
-                                                return resolve(result)
-                                            }
-                                        } else {
-                                            return resolve(result)
-                                        }
-                                    })
-                            }
+    // getPlaylist(browseId, contentLimit = 100) {
+    //     if (_.startsWith(browseId, 'VL') || _.startsWith(browseId, 'PL')) {
+    //         _.startsWith(browseId, 'PL') && (browseId = 'VL' + browseId)
+    //         return new Promise((resolve, reject) => {
+    //             this._createApiRequest('browse', utils.buildEndpointContext('PLAYLIST', browseId))
+    //                 .then(context => {
+    //                     try {
+    //                         var result = parsers.parsePlaylistPage(context)
+    //                         const getContinuations = params => {
+    //                             this._createApiRequest('browse', {}, {
+    //                                     ctoken: params.continuation,
+    //                                     continuation: params.continuation,
+    //                                     itct: params.continuation.clickTrackingParams
+    //                                 })
+    //                                 .then(context => {
+    //                                     const continuationResult = parsers.parsePlaylistPage(context)
+    //                                     if (Array.isArray(continuationResult.content)) {
+    //                                         result.content = _.concat(result.content, continuationResult.content)
+    //                                         result.continuation = continuationResult.continuation
+    //                                     }
+    //                                     if (!Array.isArray(continuationResult.continuation) && result.continuation instanceof Object) {
+    //                                         if (contentLimit > result.content.length) {
+    //                                             getContinuation(continuationResult.continuation)
+    //                                         } else {
+    //                                             return resolve(result)
+    //                                         }
+    //                                     } else {
+    //                                         return resolve(result)
+    //                                     }
+    //                                 })
+    //                         }
 
-                            if (contentLimit > result.content.length && (!Array.isArray(result.continuation) && result.continuation instanceof Object)) {
-                                getContinuations(result.continuation)
-                            } else {
-                                return resolve(result)
-                            }
-                        } catch (error) {
-                            return resolve({
-                                error: error.message
-                            })
-                        }
-                    })
-                    .catch(error => reject(error))
-            })
-        } else {
-            throw new Error('invalid playlist id.')
-        }
-    }
+    //                         if (contentLimit > result.content.length && (!Array.isArray(result.continuation) && result.continuation instanceof Object)) {
+    //                             getContinuations(result.continuation)
+    //                         } else {
+    //                             return resolve(result)
+    //                         }
+    //                     } catch (error) {
+    //                         return resolve({
+    //                             error: error.message
+    //                         })
+    //                     }
+    //                 })
+    //                 .catch(error => reject(error))
+    //         })
+    //     } else {
+    //         throw new Error('invalid playlist id.')
+    //     }
+    // }
 
     getArtist(browseId) {
         if (_.startsWith(browseId, 'UC')) {
